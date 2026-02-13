@@ -360,8 +360,6 @@ class NowListener(object):
                     pass
 
             rssi = self.__espnow.peers_table[mac][0]
-            if rssi < -70:
-                continue
 
             # Protect deserialization so a malformed message doesn't cancel the listener
             try:
@@ -384,6 +382,12 @@ class NowListener(object):
             if isinstance(incm_msg, BeaconMsg):
                 NowListener.last_seen[mac] = BadgeAdr(mac, incm_msg.nick, rssi, time())
                 self.update_event.set()  # trigger updates function
+            elif incm_msg.msg_type == "PoliceBroadcast":
+                try:
+                    from bdg.plugins.police_lights import PolicePlugin
+                    PolicePlugin.enqueue(incm_msg)
+                except Exception as e:
+                    print(f"NowListener: police plugin error: {e}")
             elif isinstance(incm_msg, AckMsg):
                 NowListener.last_seen.update_last_seen(mac, time())
                 # mark for retry buffer that msg is acked

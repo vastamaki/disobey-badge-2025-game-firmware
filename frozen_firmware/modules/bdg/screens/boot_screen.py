@@ -53,6 +53,10 @@ class BootScr(Screen):
         NowListener.con_cb = new_con_cb
         NowListener.start(self.espnow)
 
+        from bdg.plugins.police_lights import PolicePlugin
+        PolicePlugin.setup(self.espnow)
+        PolicePlugin.start(task=True)
+
     async def next_scr(self):
         print(">>> next_scr")
         await asyncio.sleep(3)
