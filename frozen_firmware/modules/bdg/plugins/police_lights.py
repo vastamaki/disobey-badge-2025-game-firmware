@@ -23,7 +23,7 @@ LED_BLUE = dimm_gamma([(0, 0, 255)], 0.4)[0]
 LED_OFF = (0, 0, 0)
 BROADCAST_MAC = b"\xbb\xbb\xbb\xbb\xbb\xbb"
 REBROADCAST_DELAY_MS = 500
-IDLE_RETRY_S = 10
+IDLE_RETRY_S = 3
 
 
 class PolicePlugin(AProc):
@@ -69,14 +69,12 @@ class PolicePlugin(AProc):
     @classmethod
     async def task(cls, *args, **kwargs):
         print("PolicePlugin: started")
-        # Initial random delay so badges don't all start at once
-        await asyncio.sleep(10 + random.randint(0, 5))
 
         while not cls.stop_event.is_set():
             # Check for idle timeout — re-trigger if no activity
             if time() - cls._last_activity > IDLE_RETRY_S:
                 if Beacon._susp.is_set():
-                    jitter = random.randint(0, 5)
+                    jitter = random.randint(0, 3)
                     print(f"PolicePlugin: idle for {IDLE_RETRY_S}s, retrying in {jitter}s")
                     await asyncio.sleep(jitter)
                     cls._last_seq += 1
